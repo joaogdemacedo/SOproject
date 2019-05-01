@@ -10,7 +10,6 @@
 #include <signal.h>
 
 
-
 int readln(int fildes, void *buf, size_t nbyte){
     int r,bytesRead=0;
     while ((r=(read(fildes,buf+bytesRead,1))>0) && ((char*)buf)[bytesRead]!='\n' ) {

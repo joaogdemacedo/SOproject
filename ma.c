@@ -1,13 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h> 
-#include <string.h>
-#include <fcntl.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <signal.h>
 #include "estruturas.c"
 
 
@@ -50,23 +40,36 @@ void ma(){
              idAtualStrings++;
          }
 
-         if(*strings[0]=='n'){          
+         if(*strings[0]=='n'){   
+
+             if(atoi(strings[1])<idAtualArtigos){       
             
-             newstr = malloc(strlen(strings[2]) + 2);
-             strcpy(newstr, strings[2]);
-             strcat(newstr, "\n");
+                newstr = malloc(strlen(strings[2]) + 2);
+                strcpy(newstr, strings[2]);
+                strcat(newstr, "\n");
 
-             write(strings_fd,newstr,strlen(newstr));
+                write(strings_fd,newstr,strlen(newstr));
 
-             colecaoArtigos[atoi(strings[1])-1].nome = strdup(strings[2]);
-             colecaoArtigos[atoi(strings[1])-1].codigoNome = idAtualStrings;
-             atualizarFicheiro=1;
-             idAtualStrings++;
+                colecaoArtigos[atoi(strings[1])-1].nome = strdup(strings[2]);
+                colecaoArtigos[atoi(strings[1])-1].codigoNome = idAtualStrings;
+                atualizarFicheiro=1;
+                idAtualStrings++;
+
+             }else{
+                printf("Esse artigo não se encontra registado\n");
+             }
+             
          }
 
-         if(*strings[0]=='p'){    
-             colecaoArtigos[atoi(strings[1])-1].preco = atoi(strings[2]); 
-             atualizarFicheiro=1;  
+         if(*strings[0]=='p'){   
+   
+            if(atoi(strings[1])<idAtualArtigos){   
+                colecaoArtigos[atoi(strings[1])-1].preco = atoi(strings[2]); 
+                atualizarFicheiro=1; 
+
+            }else{
+                printf("Esse artigo não se encontra registado\n");
+             } 
          }
 
         memset(&buf[0], 0, sizeof(buf));

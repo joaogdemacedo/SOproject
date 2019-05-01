@@ -1,25 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <fcntl.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <signal.h>
 #include "estruturas.c"
 
 void sv()
 {
-    int p, status;
-    int codigo, quant;
-    int totalLido;
+    int p,r,q,status;
+    int codigo,nCmds,quant;
+    int totalLido,codValido=1;
     char **strings;
     char buf[1024];
     char str[50];
-    int nCmds;
-    int r, q;
     int vendas_fd = open("vendas.txt", O_WRONLY | O_CREAT | O_APPEND, 0600);
 
     int client_to_server;
@@ -48,8 +36,13 @@ void sv()
 
         for (nCmds = 0; strings[nCmds] != NULL; nCmds++){};
         codigo = atoi(strings[0]);
+       
+        if(codigo<idAtualArtigos){
+            codValido=0;
+            printf("Esse artigo não se encontra registado\n");
+        }
 
-        if (nCmds == 1)
+        if (nCmds == 1 && codValido==1)
         {
             if ((p = fork()) == 0)
             {
@@ -63,7 +56,7 @@ void sv()
             }
         }
 
-        if (nCmds == 2)
+        if (nCmds == 2 && codValido==1)
         {
             quant = atoi(strings[1]);
             if (quant < 0)

@@ -3,3 +3,5 @@ Teclado
 Rato
 Garrafa
 Mouse
+novo
+outro

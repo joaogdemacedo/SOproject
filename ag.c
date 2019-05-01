@@ -12,36 +12,25 @@
 #include "estruturas.c"
 
 
-void ag(int INICIO, int FIM,int iFicheiro){
+void escreverParaFicheiro(int fd,agregacoes ag[],int tam){
+      char str[100];
 
-    int tLido;
-    int tam = FIM-INICIO+1;
-    agregacoes ag[tam];
-
-    char buf[1024];
-    char str[100];
-    char nomeF[20];
-    sprintf(nomeF,"agregacaoN%d.txt",iFicheiro);
-    int j,i=1;
-    char **strings;
-    int fd = open("vendas.txt", O_RDONLY);
-   
-   
-     for(int i=0;i<tam;i++){
-        ag[i].idArtigo=-1;
-        ag[i].quantTotal=0;
-        ag[i].montanteTotal=0;
-    }
-    
-    while ((tLido = readln(fd, buf, sizeof(buf))) > 0){
-
-        if (i < INICIO){ i++; }
-        else
+      for (int w = 0; w < tam; w++)
+    {
+        if (ag[w].idArtigo != -1)
         {
-            if(i<=FIM)
-            {
-                strings = splitString(buf);
-                for (j = 0; j < tam; j++)
+            sprintf(str, "%d %d %d\n", ag[w].idArtigo, ag[w].quantTotal, ag[w].montanteTotal);
+            write(fd, str, strlen(str));
+        }
+    }  
+    close(fd);
+}
+
+
+void escreverParaEstrutura(agregacoes ag[],int tam, char **strings){
+    int j;
+
+    for (j = 0; j < tam; j++)
                 {
                     if (ag[j].idArtigo == atoi(strings[0]))
                     {
@@ -62,6 +51,38 @@ void ag(int INICIO, int FIM,int iFicheiro){
                         }
                     }
                 }
+}
+
+
+void agAux(int INICIO, int FIM, int iFicheiro){
+
+    int tLido;
+    int tam = FIM-INICIO+1;
+    agregacoes ag[tam];
+    char buf[1024];
+    char nomeF[20];
+    sprintf(nomeF,"agregacaoN%d.txt",iFicheiro);
+    int i=1;
+    char **strings;
+    int fd = open("vendas.txt", O_RDONLY);
+   
+   
+     for(int i=0;i<tam;i++){
+        ag[i].idArtigo=-1;
+        ag[i].quantTotal=0;
+        ag[i].montanteTotal=0;
+    }
+    
+    
+     while ((tLido = readln(fd, buf, sizeof(buf))) > 0){
+
+        if (i < INICIO){ i++; }
+        else
+        {
+            if(i<=FIM)
+            {
+                strings = splitString(buf);
+                escreverParaEstrutura(ag,tam,strings);
                 i++;
             }
             else 
@@ -74,19 +95,60 @@ void ag(int INICIO, int FIM,int iFicheiro){
 
 
     int fdR = open(nomeF, O_WRONLY | O_CREAT, 0666);
-    for (int w = 0; w < tam; w++)
-    {
-        if (ag[w].idArtigo != -1)
-        {
-            sprintf(str, "%d %d %d\n", ag[w].idArtigo, ag[w].quantTotal, ag[w].montanteTotal);
-            write(fdR, str, strlen(str));
-        }
-    }  
-    close(fdR);
+    escreverParaFicheiro(fdR,ag,tam);
+
 }
 
 
-void agConc(int INICIO, int FIM){
+void agregarFicheiros(int tam){
+    char buf[1024];
+    int fdO = open("temp.txt",O_RDWR | O_CREAT, 0666);
+    char fich[25];
+    int totalLido;
+    int p;
+    char **strings;
+    agregacoes ag[tam];
+    for(int i=0;i<tam;i++){
+        ag[i].idArtigo=-1;
+        ag[i].quantTotal=0;
+        ag[i].montanteTotal=0; 
+    }
+ 
+    for(int j=1;j<=4;j++){
+        sprintf(fich,"agregacaoN%d.txt",j);
+        int fdN = open(fich,O_RDONLY);
+        while((totalLido = readln(fdN, buf, strlen(buf))) > 0){
+            write(fdO,buf,totalLido);    
+            write(fdO,"\n",1);    
+            memset(&buf[0], 0, sizeof(buf));   
+        }
+
+        close(fdN);
+        if((p=fork())==0){
+            execlp("rm","rm",fich,NULL);
+            _exit(-1);
+        }  
+    }
+   
+    close(fdO);
+    fdO = open("temp.txt",O_RDWR);
+
+    while ((totalLido = readln(fdO, buf, strlen(buf))) > 0){
+                strings = splitString(buf);
+                escreverParaEstrutura(ag,tam,strings);
+               
+                memset(&buf[0], 0, sizeof(buf));
+        }
+
+
+    char* timeS = strdup(timestamp());
+    int fdR = open(timeS, O_WRONLY | O_CREAT,0600);
+    escreverParaFicheiro(fdR,ag,tam);
+}
+
+
+
+void ag(int INICIO, int FIM){
     int TAM = FIM - INICIO + 1;
     int i, j, p, f=INICIO-1+TAM/4, ini=INICIO, dv=TAM/4;
     int status;
@@ -98,7 +160,7 @@ void agConc(int INICIO, int FIM){
             p = fork();
             if (p == 0)
             {
-                ag(ini, f, ++i);
+                agAux(ini, f, ++i);
                 _exit(++i);
             }
             ini += dv;
@@ -119,12 +181,12 @@ void agConc(int INICIO, int FIM){
                 p = fork();
                 if (p == 0)
                 {
-                    ag(ini, f, ++i);
+                    agAux(ini, f, ++i);
                     _exit(++i);
                 }
                 ini += dv;
 
-                if(i==2){f=FIM;}
+                if(i==2){ f=FIM; }
                 else { f += dv; }              
             }
             for (j = 0; j < 4; j++)
@@ -133,15 +195,15 @@ void agConc(int INICIO, int FIM){
                 printf("STATUS: %d\n", WEXITSTATUS(status));
             }
     }
-    
-    
-
+   agregarFicheiros(TAM);
 }
 
 
 
+
+
+
 int main(int argc, char* argv[]){
-   agConc(1,8);
-  
+   ag(1,15); 
 }
  

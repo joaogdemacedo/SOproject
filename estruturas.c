@@ -201,7 +201,6 @@ void insereArtigos(){
    
 }
 
-
 void atualizarArtigos(){
     int artigos_fd = open("artigos.txt",O_WRONLY | O_TRUNC);
     char string[100];
@@ -210,6 +209,8 @@ void atualizarArtigos(){
         if(colecaoArtigos[i].codigoArtigo>=0){
             sprintf(string,"%d %d %d\n",colecaoArtigos[i].codigoArtigo,colecaoArtigos[i].codigoNome,colecaoArtigos[i].preco);
             write(artigos_fd,string,strlen(string));
+        } else {
+            break;
         }
     }
 }
@@ -222,6 +223,8 @@ void atualizarStock(){
         if(colecaoArtigos[i].codigoArtigo>=0){
             sprintf(string,"%d\n",colecaoArtigos[i].stock);
             write(stocks_fd,string,strlen(string));
+        } else {
+            break;
         }
     }
 }
