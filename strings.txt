@@ -1,0 +1,5 @@
+Pc
+Teclado
+Rato
+Garrafa
+Mouse
