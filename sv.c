@@ -38,8 +38,16 @@ void sv()
         codigo = atoi(strings[0]);
        
         if(codigo<idAtualArtigos){
-            codValido=0;
-            printf("Esse artigo não se encontra registado\n");
+          if ((p = fork()) == 0)
+            {
+                write(server_to_client,"Esse artigo não se encontra registado\n", strlen("Esse artigo não se encontra registado\n"));
+                _exit(1);
+            }
+            else
+            {
+                wait(&status);
+                codValido=0;
+            }
         }
 
         if (nCmds == 1 && codValido==1)
@@ -104,6 +112,7 @@ void sv()
             }
             atualizarStock();
         }
+        codValido=1;
         memset(&buf[0], 0, sizeof(buf));
     }
 

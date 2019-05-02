@@ -77,6 +77,7 @@ void ma(){
 
     if(atualizarFicheiro==1){
         atualizarArtigos();  
+        atualizarFicheiro=0;
     }
 }
 
