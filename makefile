@@ -1,14 +1,14 @@
-ma: ma.c
+final: sv
 	gcc ma.c -o ma
-sv: sv.c
+
+sv: sv.c cv
 	gcc sv.c -o sv
-cv: cv.c
+
+cv: cv.c clean
 	gcc cv.c -o cv
-clean_all: 
-	rm strings.txt && rm artigos.txt
-clean_ma:
-	rm ma
-clean_sv:
-	rm sv
-clean_cv:
-	rm cv
+
+clean: 
+	rm ma sv cv
+
+cleanall:
+	rm strings.txt artigos.txt
