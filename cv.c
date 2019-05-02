@@ -1,22 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h> 
-#include <string.h>
-#include <fcntl.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <signal.h>
-
-
-int readln(int fildes, void *buf, size_t nbyte){
-    int r,bytesRead=0;
-    while ((r=(read(fildes,buf+bytesRead,1))>0) && ((char*)buf)[bytesRead]!='\n' ) {
-        bytesRead++;
-    }
-    return bytesRead;
-}
+#include "estruturas.c"
 
 
 void cv(){
@@ -31,8 +13,7 @@ void cv(){
 
 
    while((tLidoT = readln(0,buf,sizeof(buf)))>0){
-      ((char*)buf)[strlen(buf)-1]='\0';
-
+     // ((char*)buf)[strlen(buf)-1]='\0';
 
       client_to_server = open(myfifo, O_WRONLY);
       server_to_client = open(myfifo2, O_RDONLY);

@@ -28,7 +28,7 @@ void sv()
 
     while ((totalLido = read(client_to_server, buf, sizeof(buf))) > 0)
     {
-        buf[totalLido] = '\0';
+        // buf[totalLido] = '\0';
         printf("Mensagem recebida do cliente: %s\n", buf);
 
         strings = malloc(sizeof(char *) * 2);
@@ -37,7 +37,8 @@ void sv()
         for (nCmds = 0; strings[nCmds] != NULL; nCmds++){};
         codigo = atoi(strings[0]);
        
-        if(codigo<idAtualArtigos){
+    
+        if(codigo>=idAtualArtigos){
           if ((p = fork()) == 0)
             {
                 write(server_to_client,"Esse artigo não se encontra registado\n", strlen("Esse artigo não se encontra registado\n"));

@@ -11,6 +11,14 @@
 #include <time.h>
 #include "estruturas.c"
 
+/**
+O agregador é um programa que recebe, pelo stdin, um conjunto de entradas do ficheiro VENDAS com a 
+finalidade de agregar e enviar o resultado para o stdout. Ora, este conjunto de entradas do ficheiro 
+de VENDAS é um subconjunto do ficheiro completo, isto é, é um intervalo de registos do ficheiro VENDAS.
+Assim, uma vez que o enunciado indica que o agregador recebe essas entradas, este não deve sequer ter
+qualquer conhecimento sobre o ficheiro nem sobre a última agregação, devendo atribuir esta responsabilidade
+ao programa que o vai invocar.
+*/
 
 void escreverParaFicheiro(int fd,agregacoes ag[],int tam){
       char str[100];
