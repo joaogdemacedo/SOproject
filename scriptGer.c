@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include <unistd.h> 
 #include <string.h>
+#include <fcntl.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <signal.h>
 
 void rand_string(char *str, size_t size)
 {
@@ -18,34 +24,63 @@ void rand_string(char *str, size_t size)
 
 int main(int argc, char const *argv[])
 {
-	FILE * fp;
-	fp = fopen("script.txt","w+");
-	int num = atoi(argv[1]);
+	
+	int scriptMA = open("scriptMA.txt",O_CREAT | O_RDWR,0666);
+	int scriptCV = open("scriptCV.txt",O_CREAT | O_RDWR,0666);
+	//fp = fopen("scriptMA.txt","w+");
+	//int num = atoi(argv[1]);
 	int i;
 	char cmd[4] = {'i','n','p','\0'};
 
-	for (i = 0; i < num; i++)
+	for (i = 0; i < 500000; i++)
 	{
-		int comando = rand() % 3;
-		int price = rand() % 1000;
-		int tamnome = rand() % 10;
-		int codigo = rand();
-		char nome[tamnome];
-
+		int tamnome = rand() % 80;
 		if (tamnome<3){tamnome+=4;}
+		char nome[tamnome];
 		rand_string(nome,tamnome); // escreve o nome
+		int preco = rand() % 1001;
+		char linha[100];
 
-		if (comando == 0) // inserir artigo "i"
+		sprintf(linha,"i %s %d\n",nome,preco);
+		write(scriptMA,linha,strlen(linha));
+		memset(&linha,0,sizeof(linha));
+	}
+	for (i = 0; i < 10000; i++)
+	{
+		int opcao = rand() % 2;
+		int codigo = rand() % 500000;
+		char linha[100];
+		char string[20];
+
+		if (opcao == 0) 
 		{
-			fprintf(fp,"i %s %d\n",nome, price);
+			int tamnome = rand() % 80;
+			if (tamnome<3){tamnome+=4;}
+			char nome[tamnome];
+			rand_string(nome,tamnome); // escreve o nome
+
+			// alterar o nome
+			sprintf(linha,"n %d %s\n",codigo,nome);
+			write(scriptMA,linha,strlen(linha));
+			memset(&linha,0,sizeof(linha));
+			// pedir para mostrar stock e preço
+			sprintf(string,"%d\n",codigo);
+			write(scriptCV,string,strlen(string));
+			memset(&string,0,sizeof(string));
 		}
-		if (comando == 1) // altera nome "n"
+		if (opcao == 1)
 		{
-			fprintf(fp,"n %d %s\n", codigo, nome);	
-		}
-		if (comando == 2) // altera preço "p"
-		{
-			fprintf(fp,"p %d %d\n", codigo, price);
+			int preco = rand() % 1001;
+			int quantidade = ((rand() % 100) - (rand()%100));
+
+			// alterar o preço
+			sprintf(linha,"p %d %d\n",codigo,preco);
+			write(scriptMA,linha,strlen(linha));
+			memset(&linha,0,sizeof(linha));
+			// pedir para actualizar stock 
+			sprintf(string,"%d %d\n",codigo,quantidade);
+			write(scriptCV,string,strlen(string));
+			memset(&string,0,sizeof(string));
 		}
 	}
 	return 0;

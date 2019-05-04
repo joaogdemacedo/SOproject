@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include <time.h>
+#include <ctype.h>
 #include "estruturas.h"
 
 int idAtualArtigos=1;
@@ -23,14 +24,6 @@ struct Artigos{
     int stock;
 };
 artigos colecaoArtigos[1000];
-
-struct Vendas{
-    int codigoArtigo;
-    int quantidade;
-    int montanteTotal;
-};
-venda colecaoVendas[1000];
-
 
 struct Agregacoes{
     int idArtigo;
@@ -61,10 +54,6 @@ void addInfo() {
         colecaoArtigos[j].nome = NULL;
         colecaoArtigos[j].preco = -1;
         colecaoArtigos[j].stock = 0;
-
-        colecaoVendas[j].codigoArtigo = -1;
-        colecaoVendas[j].quantidade = -1;
-        colecaoVendas[j].montanteTotal = -1;
     }
 }
 
@@ -89,19 +78,6 @@ char** splitString(char * cmd1){
     return arrSt;
 }
 
-char* nomeArtigo(int posicao){
-     int strings_fd = open("strings.txt",O_RDONLY);
-     char buf[1024];
-     int r;
-     int i=0;
-
-     while(i<posicao && ((r = readln(strings_fd,buf,strlen(buf)))>0) ){
-        i++;
-    }
-    char* novaS = strdup(buf);
-    return novaS;
-}
-
 void verArtigosDaEstrutura(){
     printf("\nARTIGOS\n");
     printf("%d\n",idAtualArtigos);
@@ -118,45 +94,6 @@ void verArtigosDaEstrutura(){
             printf("-------------\n");
         }
     }
-}
-
-void verVendasDaEstrutura(){
-    printf("\nVENDAS\n");
-    printf("%d\n",idAtualVendas);
-    printf("-------------\n");
-
-    for(int i=0;i<1000;i++){
-        if(colecaoVendas[i].codigoArtigo >=0){
-            printf("%d\n",colecaoVendas[i].codigoArtigo);
-            printf("%d\n",colecaoVendas[i].quantidade);
-            printf("%d\n",colecaoVendas[i].montanteTotal);
-            printf("-------------\n");
-        }
-    }
-}
-
-void insereVendas(){
-    
-    int vendas_fd = open("vendas.txt",O_RDONLY|O_CREAT|O_APPEND,0666);
-    char buf[1024];
-    int r;
-    int i=0;
-    char** strings;
-
-     while((r = readln(vendas_fd,buf,strlen(buf)))>0){
-        strings = malloc(sizeof(char *)*r);
-        strings = splitString(buf);
-       
-        colecaoVendas[i].codigoArtigo = atoi(strings[0]);
-        colecaoVendas[i].quantidade = atoi(strings[1]);
-        colecaoVendas[i].montanteTotal = atoi(strings[2]);
-        
-        idAtualVendas=atoi(strings[0]);
-        i++;
-        memset(&buf[0], 0, sizeof(buf));
-    }
-
-   // verVendasDaEstrutura();
 }
 
 void insereArtigos(){
@@ -201,32 +138,113 @@ void insereArtigos(){
    
 }
 
-void atualizarArtigos(){
-    int artigos_fd = open("artigos.txt",O_WRONLY | O_TRUNC);
-    char string[100];
 
-    for(int i=0;i<1000;i++){
-        if(colecaoArtigos[i].codigoArtigo>=0){
-            sprintf(string,"%d %d %d\n",colecaoArtigos[i].codigoArtigo,colecaoArtigos[i].codigoNome,colecaoArtigos[i].preco);
-            write(artigos_fd,string,strlen(string));
-        } else {
-            break;
-        }
+
+// varGlobais
+void atualizarVarGlobais(){
+    int artigos_fd = open("artigos.txt",O_RDONLY|O_CREAT|O_CREAT,0666);
+    int strings_fd = open("strings.txt",O_RDONLY|O_CREAT|O_CREAT,0666);
+    int vendas_fd = open("vendas.txt",O_RDONLY|O_CREAT|O_CREAT,0666);
+    char buf[1024];
+
+    while(readln(artigos_fd,buf,strlen(buf))>0){
+        idAtualArtigos++;
+        memset(&buf[0], 0, sizeof(buf)); 
     }
+    close(artigos_fd);
+
+    while(readln(strings_fd,buf,strlen(buf))>0){
+        idAtualStrings++;
+        memset(&buf[0], 0, sizeof(buf)); 
+    }
+    close(strings_fd);
+
+    while(readln(vendas_fd,buf,strlen(buf))>0){
+        idAtualVendas++;
+        memset(&buf[0], 0, sizeof(buf)); 
+    }
+    close(vendas_fd);
+    
 }
 
-void atualizarStock(){
-    int stocks_fd = open("stocks.txt",O_WRONLY | O_TRUNC);
-    char string[10];
 
-    for(int i=0;i<1000;i++){
-        if(colecaoArtigos[i].codigoArtigo>=0){
-            sprintf(string,"%d\n",colecaoArtigos[i].stock);
-            write(stocks_fd,string,strlen(string));
-        } else {
-            break;
-        }
+// "xxxxxx xxxxxx xxxxxx\n" 21
+off_t avancar_offset_artigos(int linha, int fd){
+    int TAM_LINHA=21;
+    off_t r;
+    off_t offset = TAM_LINHA *(linha-1);
+
+    r = lseek(fd,offset,SEEK_SET);
+    return r;
+}
+
+// "xxxxxx\n" 7
+off_t avancar_offset_stock(int linha, int fd){
+    int TAM_LINHA=7;
+    off_t r;
+    off_t offset = TAM_LINHA *(linha-1);
+
+    r = lseek(fd,offset,SEEK_SET);
+    return r;
+}
+
+
+//80
+off_t avancar_offset_strings(int linha, int fd){
+    int TAM_LINHA=80;
+    off_t r;
+    off_t offset = TAM_LINHA *(linha-1);
+
+    r = lseek(fd,offset,SEEK_SET);
+    return r;
+}
+
+// buscar o nome do artigo ao ficheiro strings
+char* nomeArtigo(int idArtigo){
+    off_t r;
+    char* nome;
+    char buf[90];
+    int strings_fd = open("strings.txt",O_RDONLY); 
+    
+    r = avancar_offset_strings(idArtigo,strings_fd);
+    readln(strings_fd,buf,strlen(buf));
+    close(strings_fd);
+
+    nome=strdup(buf);
+    return nome;
+}
+
+
+char* NumToString (int i){
+     long long n=i;
+     char str[10];
+     int count=0;
+     while(n != 0)
+    {
+        n = n/10;
+        ++count;
     }
+    int NumZeros= 6-count;
+    if(NumZeros==0){
+         sprintf(str,"%d",i); 
+    }
+    if(NumZeros==1){
+       sprintf(str,"0%d",i); 
+    }
+    if(NumZeros==2){
+        sprintf(str,"00%d",i);
+    }
+    if(NumZeros==3){
+        sprintf(str,"000%d",i);
+    }
+    if(NumZeros==4){
+        sprintf(str,"0000%d",i);
+    }
+    if(NumZeros==5){
+        sprintf(str,"00000%d",i);
+    }
+    char*r=strdup(str);
+    return r;
 }
 
 

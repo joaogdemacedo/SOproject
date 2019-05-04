@@ -4,7 +4,7 @@ final: sv
 sv: sv.c cv
 	gcc sv.c -o sv
 
-cv: cv.c clean
+cv: cv.c 
 	gcc cv.c -o cv
 
 clean: 

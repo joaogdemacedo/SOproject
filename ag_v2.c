@@ -107,12 +107,10 @@ void principal(int INICIO, int FIM){
        linha++;
        memset(&buf[0], 0, sizeof(buf)); 
   }
-  printf("cenas");
+
   close(fdV);
   close(fdC);
   char* ficheiro = strdup("conjunto.txt");
-
-  printf("cenas");
   ag(ficheiro);
 }
 

@@ -7,11 +7,13 @@ void ma(){
     int totalL;
     int artigos_fd;
     int strings_fd;
+    int stocks_fd;
     char ** strings;
     char *newstr;
     int atualizarFicheiro=0;
-    artigos_fd = open("artigos.txt",O_WRONLY | O_CREAT | O_APPEND,0666);
-    strings_fd = open("strings.txt",O_WRONLY |O_CREAT |O_APPEND,0666);
+    artigos_fd = open("artigos.txt",O_WRONLY);
+    strings_fd = open("strings.txt",O_WRONLY | O_APPEND);
+    stocks_fd = open("stocks.txt",O_WRONLY | O_CREAT | O_APPEND,0600);
  
 
     while((totalL=readln(0,buf,strlen(buf))>0)){
@@ -22,17 +24,16 @@ void ma(){
          if(*strings[0]=='i'){
             char stringNum[totalL];
 
-            colecaoArtigos[idAtualArtigos-1].codigoArtigo = idAtualArtigos;
-            colecaoArtigos[idAtualArtigos-1].codigoNome = idAtualStrings;
-            colecaoArtigos[idAtualArtigos-1].nome = strdup(strings[1]);
-            colecaoArtigos[idAtualArtigos-1].preco = atoi(strings[2]);
-
              newstr = malloc(strlen(strings[1]) + 2);
              strcpy(newstr, strings[1]);
              strcat(newstr, "\n");
-         
-             write(strings_fd,newstr,strlen(newstr));
-             sprintf(stringNum,"%d %d %s\n",idAtualArtigos,idAtualStrings,strings[2]); 
+             
+            
+             write(strings_fd,newstr,strlen(newstr));     
+             sprintf(stringNum,"%s %s %s\n",NumToString(idAtualArtigos),NumToString(idAtualStrings),NumToString(atoi(strings[2]))); 
+             write(stocks_fd,"000000\n",2);
+
+             lseek(artigos_fd,0,SEEK_END);
              write(artigos_fd,stringNum,strlen(stringNum));
 
              printf("ID do artigo: %d\n",idAtualArtigos);
@@ -50,22 +51,23 @@ void ma(){
 
                 write(strings_fd,newstr,strlen(newstr));
 
-                colecaoArtigos[atoi(strings[1])-1].nome = strdup(strings[2]);
-                colecaoArtigos[atoi(strings[1])-1].codigoNome = idAtualStrings;
-                atualizarFicheiro=1;
+                avancar_offset_artigos(atoi(strings[1]),artigos_fd);
+                lseek(artigos_fd,7,SEEK_CUR);
+                write(artigos_fd,NumToString(idAtualStrings),6);
                 idAtualStrings++;
 
              }else{
                 printf("Esse artigo não se encontra registado\n");
-             }
+             }  
              
          }
 
          if(*strings[0]=='p'){   
    
             if(atoi(strings[1])<idAtualArtigos){   
-                colecaoArtigos[atoi(strings[1])-1].preco = atoi(strings[2]); 
-                atualizarFicheiro=1; 
+                avancar_offset_artigos(atoi(strings[1]),artigos_fd);
+                lseek(artigos_fd,14,SEEK_CUR);
+                write(artigos_fd,NumToString(atoi(strings[2])),6);
 
             }else{
                 printf("Esse artigo não se encontra registado\n");
@@ -74,17 +76,12 @@ void ma(){
 
         memset(&buf[0], 0, sizeof(buf));
     } 
-
-    if(atualizarFicheiro==1){
-        atualizarArtigos();  
-        atualizarFicheiro=0;
-    }
 }
 
 
 int main(int argc,  char * argv[]){
     addInfo();
-    insereArtigos();
-    insereVendas();
+    atualizarVarGlobais();
     ma();
+   
 }
