@@ -14,13 +14,19 @@ void sv()
     int vendas_fd = open("vendas.txt", O_WRONLY | O_APPEND);
     int stocks_fd = open("stocks.txt", O_RDWR);
     int artigos_fd = open("artigos.txt", O_RDONLY);
+    int ultimaLinha = open("ultimaLinha.txt",O_CREAT | O_RDWR,0600);
+    int linhaVendas=0;
 
     
     char *myfifo = "client_to_server_fifo";
     char *myfifo2 = "server_to_client_fifo";
+    char *myfifo3 = "server_to_ag_fifo";
+    char *myfifo4 = "ma_to_server_fifo";
 
     mkfifo(myfifo, 0666);
     mkfifo(myfifo2, 0666);
+    mkfifo(myfifo3,0666);
+    mkfifo(myfifo4,0666);
 
     printf("----------------------\n");
     printf("------ SERVIDOR ------\n");
@@ -28,6 +34,40 @@ void sv()
 
     client_to_server = open(myfifo, O_RDONLY);
     server_to_client = open(myfifo2, O_WRONLY);
+    
+
+    int bastardo;
+    bastardo = fork();
+    if(bastardo == 0){
+        
+        int ma_to_server_fifo = open(myfifo4,O_RDONLY);
+        int server_to_ag_fifo = open(myfifo3,O_WRONLY);
+
+        if((totalLido = readln(ultimaLinha, buf, sizeof(buf))) == 0){
+            linhaVendas = 1;
+            memset(&buf[0], 0, sizeof(buf));
+        } else { 
+            linhaVendas = atoi(buf);          
+            memset(&buf[0], 0, sizeof(buf)); 
+
+        }
+
+        while ((totalLido = read(ma_to_server_fifo, buf, sizeof(buf))) > 0)
+        {
+            server_to_ag_fifo = open(myfifo3,O_WRONLY);
+            lseek(vendas_fd,21*(linhaVendas-1),SEEK_SET);
+            while((totalLido = readln(vendas_fd, buf, sizeof(buf))) > 0){
+                printf("Recebi um a\n");
+                write(server_to_ag_fifo,buf,totalLido);
+                memset(&buf[0], 0, sizeof(buf)); 
+                linhaVendas++;
+        }
+        sprintf(str,"%d\n",linhaVendas);
+        write(ultimaLinha,str,strlen(str));
+        memset(&str[0],0,sizeof(str));
+        }
+
+    }
 
     while (1)
     {
@@ -161,9 +201,11 @@ void sv()
     
 }
 
+
+
 void handler(int i){
     if(i==SIGINT){
-        write(1,"\nServidor desconectado!\n",strlen("\nServidor desconectado!\n"));
+        write(1,"\nServidor desconectado!\n",strlen("\nServidor desconectado!\n")); 
         close(client_to_server);
         close(server_to_client);
         unlink("client_to_server_fifo");
@@ -177,6 +219,7 @@ int main(int argc, char *argv[])
 {
     if(signal(SIGINT,handler)==SIG_ERR){
         perror("SIGINT failed");
+        
     }
 
     addInfo();

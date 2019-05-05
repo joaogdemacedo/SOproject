@@ -22,6 +22,7 @@ void cv(){
       memset(&buf[0], 0, sizeof(buf));
       
       tLidoP = read(server_to_client,buf,sizeof(buf));
+      
       ((char*)buf)[tLidoP]='\0'; 
 
       write(1,buf,strlen(buf));

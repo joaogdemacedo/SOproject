@@ -70,9 +70,10 @@ int readln(int fildes, void *buf, size_t nbyte){
 
 char** splitString(char * cmd1){
     char ** arrSt = calloc(10,sizeof(char *));
+    char *r=strdup(cmd1);
     int i;
     char * pch;
-    for(pch = strtok(cmd1," "), i = 0; pch!=NULL; pch = strtok(NULL," "),i++){
+    for(pch = strtok(r," "), i = 0; pch!=NULL; pch = strtok(NULL," "),i++){
         arrSt[i]=strdup(pch);
     }
     return arrSt;
