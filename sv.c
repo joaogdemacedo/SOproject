@@ -71,7 +71,9 @@ void sv()
                  memset(&buffer[0], 0, sizeof(buffer)); 
                  linhaVendas++;
         }
+
             sprintf(total,"%d\n",linhaVendas);
+            lseek(ultimaLinha,0,SEEK_SET);
             write(ultimaLinha,total,strlen(total));
             close(ultimaLinha);
             memset(&total[0],0,sizeof(total));
