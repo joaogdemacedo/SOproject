@@ -14,28 +14,11 @@ void ma(){
     artigos_fd = open("artigos.txt",O_WRONLY);
     strings_fd = open("strings.txt",O_WRONLY | O_APPEND);
     stocks_fd = open("stocks.txt",O_WRONLY | O_CREAT | O_APPEND,0600);
-    int ma_to_server_fifo;
-    char *myfifo4 = "ma_to_server_fifo";
 
     while((totalL=readln(0,buf,strlen(buf))>0)){
          strings = malloc(sizeof(char *)*totalL);
          strings = splitString(buf);
-         printf("asjlndaksmd\n");
-         if (*strings[0] == 'a'){
-            printf("filho");
-
-            ma_to_server_fifo = open(myfifo4,O_WRONLY);
-            int filho;
-            filho = fork();
-            
-            if(filho==0){
-                
-                execlp("ag","ag",NULL,NULL);
-            }
-            wait(NULL);
-            write(ma_to_server_fifo,"a\n",2);
-         }
-
+        
          
          if(*strings[0]=='i'){
             char stringNum[totalL];
@@ -89,8 +72,25 @@ void ma(){
                 printf("Esse artigo não se encontra registado\n");
              } 
          }
-         
-         
+
+        if (*strings[0] == 'a'){
+            //printf("TT1\n");
+            
+            int filho;
+            filho = fork();
+            
+            if(filho==0){ 
+             // printf("TT2\n"); 
+                char *myfifo4 = "ma_to_server_fifo";
+                int ma_to_server_fifo = open(myfifo4,O_WRONLY);  
+                write(ma_to_server_fifo,"a\0",1);
+                close(ma_to_server_fifo);
+                execlp("./ag","./ag",NULL,NULL);
+            } else {
+               wait(NULL);
+              
+           }
+         }  
 
         memset(&buf[0], 0, sizeof(buf));
     } 
@@ -101,5 +101,6 @@ int main(int argc,  char * argv[]){
       addInfo();
       atualizarVarGlobais();
       ma();
+   
 
 }

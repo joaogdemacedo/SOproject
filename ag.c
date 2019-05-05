@@ -32,6 +32,7 @@ void puta(int fd){
 }
 
 void ag(){
+    //printf("TT6\n");
     int tEntrada;
     char buf[1024];
     char linha[7];
@@ -41,36 +42,43 @@ void ag(){
     int cod;
     int l;
     int agAuxiliar = open("agAuxiliar.txt",O_CREAT | O_RDWR | O_TRUNC,0666);
-    puta(agAuxiliar);
-    //char *timestamp = strdup(timestamp());
-	int ag = open("timestamp.txt",O_CREAT | O_RDWR,0666);
+    puta(agAuxiliar);  
+    char* timeS = strdup(timestamp());
+	int ag = open(timeS,O_CREAT | O_RDWR,0666);
 
     char *myfifo3 = "server_to_ag_fifo";
     server_to_ag_fifo = open(myfifo3, O_RDONLY);
     dup2(server_to_ag_fifo,0);
+    //printf("TT7\n");
 
 
     // entrada = codigo quantidade montante
-    while((tEntrada = readln(0,buf,sizeof(buf)))>0){
+    while((tEntrada = read(0,buf,sizeof(buf)))>0){
+       // printf("%s\n",buf);
           strings = malloc(sizeof(char *) * 2);
           strings = splitString(buf);
+     //     printf("TT8\n");
           
           cod=atoi(strings[0]);
           lseek(agAuxiliar,14*(cod-1)+7,SEEK_SET);
           readln(agAuxiliar,linha,6);
+      //    printf("%s\n",linha);
+          l = atoi(linha);
         
-          if((l = atoi(linha))==0){
+          if(l==0){
+            //  printf("TT9\n");
               memset(&linha[0], 0, sizeof(linha));
               lseek(agAuxiliar,14*(cod-1)+7,SEEK_SET);
               write(agAuxiliar,NumToString(linhaAtual),6);
               linhaAtual++;
 
-              lseek(agAuxiliar,0,SEEK_END);
+              lseek(ag,0,SEEK_END);
               memset(&buf[0], 0, sizeof(buf));
               sprintf(buf,"%s %s %s\n",NumToString(cod),NumToString(atoi(strings[1])),NumToString(atoi(strings[2])));
               write(ag,buf,strlen(buf));
               memset(&buf[0], 0, sizeof(buf));  
           } else {
+            //  printf("TT10\n");
               memset(&buf[0], 0, sizeof(buf)); 
               lseek(ag,21 * (l-1)+7,SEEK_SET);
               memset(&linha[0], 0, sizeof(linha));
@@ -91,8 +99,12 @@ void ag(){
               write(ag,buf,13);
               memset(&buf[0], 0, sizeof(buf)); 
           }
-
+        memset(&buf[0], 0, sizeof(buf)); 
    }
+
+   close(agAuxiliar);
+   close(server_to_ag_fifo);
+   close(ag);
 }
 
 

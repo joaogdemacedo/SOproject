@@ -11,11 +11,9 @@ void sv()
     char **strings;
     char buf[1024];
     char str[50];
-    int vendas_fd = open("vendas.txt", O_WRONLY | O_APPEND);
+    int vendas_fd = open("vendas.txt", O_RDWR);
     int stocks_fd = open("stocks.txt", O_RDWR);
     int artigos_fd = open("artigos.txt", O_RDONLY);
-    int ultimaLinha = open("ultimaLinha.txt",O_CREAT | O_RDWR,0600);
-    int linhaVendas=0;
 
     
     char *myfifo = "client_to_server_fifo";
@@ -32,42 +30,57 @@ void sv()
     printf("------ SERVIDOR ------\n");
     printf("----------------------\n");
 
-    client_to_server = open(myfifo, O_RDONLY);
-    server_to_client = open(myfifo2, O_WRONLY);
-    
-
+    int ultimaLinha = open("ultimaLinha.txt",O_CREAT | O_RDWR,0600);
     int bastardo;
+
     bastardo = fork();
     if(bastardo == 0){
-        
+        //printf("TT2\n");
+
         int ma_to_server_fifo = open(myfifo4,O_RDONLY);
-        int server_to_ag_fifo = open(myfifo3,O_WRONLY);
-
-        if((totalLido = readln(ultimaLinha, buf, sizeof(buf))) == 0){
-            linhaVendas = 1;
-            memset(&buf[0], 0, sizeof(buf));
-        } else { 
-            linhaVendas = atoi(buf);          
-            memset(&buf[0], 0, sizeof(buf)); 
-
+        int server_to_ag_fifo  = open(myfifo3,O_WRONLY);
+        int linhaVendas=0;
+        int tL;
+        char total[10];
+        char buffer[1024];
+       
+              
+        if((tL = readln(ultimaLinha, buffer, sizeof(buffer))) == 0){
+             linhaVendas = 1;
+             memset(&buffer[0], 0, sizeof(buffer));
+             //printf("TT3\n");
+        }else { 
+            linhaVendas = atoi(buffer);          
+            memset(&buffer[0], 0, sizeof(buffer)); 
+            //printf("TT4\n");
         }
 
-        while ((totalLido = read(ma_to_server_fifo, buf, sizeof(buf))) > 0)
-        {
-            server_to_ag_fifo = open(myfifo3,O_WRONLY);
+        
+        while((tL = read(ma_to_server_fifo, buffer, sizeof(buffer))) > 0){
             lseek(vendas_fd,21*(linhaVendas-1),SEEK_SET);
-            while((totalLido = readln(vendas_fd, buf, sizeof(buf))) > 0){
-                printf("Recebi um a\n");
-                write(server_to_ag_fifo,buf,totalLido);
-                memset(&buf[0], 0, sizeof(buf)); 
-                linhaVendas++;
+            //printf("TT4.1\n");
+            
+            while((tL = readln(vendas_fd, buffer, sizeof(buffer))) > 0){
+               // printf("TT5\n");
+                int m = fork();
+                 if(m==0){
+                   write(server_to_ag_fifo,buffer,tL);
+                   _exit(1);
+                 }
+                 wait(NULL);
+                 memset(&buffer[0], 0, sizeof(buffer)); 
+                 linhaVendas++;
         }
-        sprintf(str,"%d\n",linhaVendas);
-        write(ultimaLinha,str,strlen(str));
-        memset(&str[0],0,sizeof(str));
+            sprintf(total,"%d\n",linhaVendas);
+            write(ultimaLinha,total,strlen(total));
+            close(ultimaLinha);
+            memset(&total[0],0,sizeof(total));
         }
-
     }
+
+    
+    client_to_server = open(myfifo, O_RDONLY);
+    server_to_client = open(myfifo2, O_WRONLY);
 
     while (1)
     {
@@ -153,6 +166,7 @@ void sv()
                         int preco = atoi(buffilho);
                         memset(&buffilho[0], 0, sizeof(buffilho));
 
+                        lseek(vendas_fd, 0, SEEK_END);
                         sprintf(str, "%d %d %d\n", codigo, abs(quant), (abs(quant) * preco));
                         write(vendas_fd, str, strlen(str));
 
