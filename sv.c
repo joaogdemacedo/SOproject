@@ -1,7 +1,7 @@
 #include "estruturas.c"
 
-int client_to_server=0;
-int server_to_client=0;
+int client_to_server = -1;
+int server_to_client = -1;
 
 void sv()
 {
@@ -12,75 +12,102 @@ void sv()
     char buf[1024];
     char str[50];
     int vendas_fd = open("vendas.txt", O_RDWR);
+    if(vendas_fd<0){
+        perror("Erro na abertura do ficheiro VENDAS");
+    }
     int stocks_fd = open("stocks.txt", O_RDWR);
+    if(stocks_fd<0){
+        perror("Erro na abertura do ficheiro STOCKS");
+    }
     int artigos_fd = open("artigos.txt", O_RDONLY);
+    if(artigos_fd<0){
+        perror("Erro na abertura do ficheiro ARTIGOS");
+    }
 
-    
     char *myfifo = "client_to_server_fifo";
     char *myfifo2 = "server_to_client_fifo";
     char *myfifo3 = "server_to_ag_fifo";
     char *myfifo4 = "ma_to_server_fifo";
 
-    mkfifo(myfifo, 0666);
-    mkfifo(myfifo2, 0666);
-    mkfifo(myfifo3,0666);
-    mkfifo(myfifo4,0666);
+    if(mkfifo(myfifo, 0666)<0){
+        perror("Erro na criação do pipe com nome client_to_server_fifo");
+    }
+    if(mkfifo(myfifo2, 0666)<0){
+        perror("Erro na criação do pipe com nome server_to_client_fifo");
+    }
+    if(mkfifo(myfifo3, 0666)<0){
+        perror("Erro na criação do pipe com nome server_to_ag_fifo");
+    } 
+    if(mkfifo(myfifo4, 0666)<0){
+        perror("Erro na criação do pipe com nome ma_to_server_fifo");
+    }
+
 
     printf("----------------------\n");
     printf("------ SERVIDOR ------\n");
     printf("----------------------\n");
 
-    int ultimaLinha = open("ultimaLinha.txt",O_CREAT | O_RDWR,0600);
+    int ultimaLinha = open("ultimaLinha.txt", O_CREAT | O_RDWR, 0600);
+    if(ultimaLinha<0){
+        perror("Erro na abertura do ficheiro ultimalinha");
+    }
+
     int bastardo;
 
     bastardo = fork();
-    if(bastardo == 0){
-       // printf("TT2\n");
+    if (bastardo == 0)
+    {
+        // printf("TT2\n");
 
-        int linhaVendas=0;
+        int linhaVendas = 0;
         int tL;
         char total[10];
         char buffer[1024];
-       
-              
-        if((tL = readln(ultimaLinha, buffer, sizeof(buffer))) == 0){
-             linhaVendas = 1;
-             memset(&buffer[0], 0, sizeof(buffer));
-            // printf("TT3\n");
-        }else { 
-            linhaVendas = atoi(buffer);          
-            memset(&buffer[0], 0, sizeof(buffer)); 
-          //  printf("TT4\n");
-        }
-        int ma_to_server_fifo = open(myfifo4,O_RDONLY);
-        
-        while((tL = read(ma_to_server_fifo, buffer, sizeof(buffer))) > 0){
-            int server_to_ag_fifo  = open(myfifo3,O_WRONLY);
-            lseek(vendas_fd,21*(linhaVendas-1),SEEK_SET);
-         //   printf("TT4.1\n");
-            
-            while((tL = readln(vendas_fd, buffer, sizeof(buffer))) > 0){
-             //   printf("TT5\n");
-                int m = fork();
-                 if(m==0){
-                   write(server_to_ag_fifo,buffer,tL);
-                   _exit(1);
-                 }
-                 wait(NULL);
-                 memset(&buffer[0], 0, sizeof(buffer)); 
-                 linhaVendas++;
-        }
-        close(server_to_ag_fifo);
 
-            sprintf(total,"%d\n",linhaVendas);
-            lseek(ultimaLinha,0,SEEK_SET);
-            write(ultimaLinha,total,strlen(total));
+        if ((tL = readln(ultimaLinha, buffer, sizeof(buffer))) == 0)
+        {
+            linhaVendas = 1;
+            memset(&buffer[0], 0, sizeof(buffer));
+            // printf("TT3\n");
+        }
+        else
+        {
+            linhaVendas = atoi(buffer);
+            memset(&buffer[0], 0, sizeof(buffer));
+            //  printf("TT4\n");
+        }
+       
+        int ma_to_server_fifo = open(myfifo4, O_RDONLY);
+
+        while ((tL = read(ma_to_server_fifo, buffer, sizeof(buffer))) > 0)
+        {
+            int server_to_ag_fifo = open(myfifo3, O_WRONLY);
+            lseek(vendas_fd, 21 * (linhaVendas - 1), SEEK_SET);
+            //   printf("TT4.1\n");
+
+            while ((tL = readln(vendas_fd, buffer, sizeof(buffer))) > 0)
+            {
+                //   printf("TT5\n");
+                int m = fork();
+                if (m == 0)
+                {
+                    write(server_to_ag_fifo, buffer, tL);
+                    _exit(1);
+                }
+                wait(NULL);
+                memset(&buffer[0], 0, sizeof(buffer));
+                linhaVendas++;
+            }
+            close(server_to_ag_fifo);
+
+            sprintf(total, "%d\n", linhaVendas);
+            lseek(ultimaLinha, 0, SEEK_SET);
+            write(ultimaLinha, total, strlen(total));
             close(ultimaLinha);
-            memset(&total[0],0,sizeof(total));
+            memset(&total[0], 0, sizeof(total));
         }
     }
 
-    
     client_to_server = open(myfifo, O_RDONLY);
     server_to_client = open(myfifo2, O_WRONLY);
 
@@ -152,14 +179,14 @@ void sv()
                         int stock_antigo = atoi(buffilho);
                         int stock_novo = stock_antigo + quant;
 
-                        if (stock_novo < 0) {
-                            write(server_to_client,"Quantidade indisponivel.\n",strlen("Quantidade indisponivel.\n"));
+                        if (stock_novo < 0)
+                        {
+                            write(server_to_client, "Quantidade indisponivel.\n", strlen("Quantidade indisponivel.\n"));
                             _exit(-1);
                         }
-                        
 
                         avancar_offset_stock(codigo, stocks_fd);
-                        write(stocks_fd,NumToString(stock_novo),6);
+                        write(stocks_fd, NumToString(stock_novo), 6);
                         memset(&buffilho[0], 0, sizeof(buffilho));
 
                         avancar_offset_artigos(codigo, artigos_fd);
@@ -199,7 +226,7 @@ void sv()
                         write(server_to_client, str, strlen(str));
 
                         avancar_offset_stock(codigo, stocks_fd);
-                        write(stocks_fd,NumToString(stock_novo),6);
+                        write(stocks_fd, NumToString(stock_novo), 6);
                         memset(&buffilho[0], 0, sizeof(buffilho));
                         _exit(3);
                     }
@@ -213,15 +240,13 @@ void sv()
             memset(&buf[0], 0, sizeof(buf));
         }
     }
-
-    
 }
 
-
-
-void handler(int i){
-    if(i==SIGINT){
-        write(1,"\nServidor desconectado!\n",strlen("\nServidor desconectado!\n")); 
+void handler(int i)
+{
+    if (i == SIGINT)
+    {
+        write(1, "\nServidor desconectado!\n", strlen("\nServidor desconectado!\n"));
         close(client_to_server);
         close(server_to_client);
         unlink("client_to_server_fifo");
@@ -229,15 +254,16 @@ void handler(int i){
         unlink("ma_to_server_fifo");
         unlink("server_to_ag_fifo");
 
-        kill(getpid(),SIGKILL);
+        kill(getpid(), SIGKILL);
     }
 }
 
+
 int main(int argc, char *argv[])
 {
-    if(signal(SIGINT,handler)==SIG_ERR){
+    if (signal(SIGINT, handler) == SIG_ERR)
+    {
         perror("SIGINT failed");
-        
     }
     //addInfo();
     atualizarVarGlobais();

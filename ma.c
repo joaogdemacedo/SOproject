@@ -10,10 +10,19 @@ void ma(){
     int stocks_fd;
     char ** strings;
     char *newstr;
-    int atualizarFicheiro=0;
+
     artigos_fd = open("artigos.txt",O_WRONLY);
+    if(artigos_fd<0){
+        perror("Erro na abertura do ficheiro ARTIGOS");
+    }
     strings_fd = open("strings.txt",O_WRONLY | O_APPEND);
+    if(strings_fd<0){
+        perror("Erro na abertura do ficheiro STRINGS");
+    }
     stocks_fd = open("stocks.txt",O_WRONLY | O_CREAT | O_APPEND,0600);
+    if(stocks_fd<0){
+        perror("Erro na abertura do ficheiro STOCKS");
+    }
 
     while((totalL=readln(0,buf,strlen(buf))>0)){
          strings = malloc(sizeof(char *)*totalL);
@@ -74,8 +83,7 @@ void ma(){
          }
 
         if (*strings[0] == 'a'){
-            //printf("TT1\n");
-            
+            //printf("TT1\n");        
             int filho;
             filho = fork();
             
@@ -93,7 +101,11 @@ void ma(){
          }  
 
         memset(&buf[0], 0, sizeof(buf));
-    } 
+    }
+    
+    close(artigos_fd);
+    close(strings_fd);
+    close(stocks_fd); 
 }
 
 

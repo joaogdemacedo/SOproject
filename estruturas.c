@@ -25,11 +25,6 @@ struct Artigos{
 };
 artigos colecaoArtigos[1000];
 
-struct Agregacoes{
-    int idArtigo;
-    int quantTotal;
-    int montanteTotal;
-};
 
 
 char* timestamp(){
@@ -78,6 +73,8 @@ char** splitString(char * cmd1){
     }
     return arrSt;
 }
+
+
 
 void verArtigosDaEstrutura(){
     printf("\nARTIGOS\n");
@@ -141,11 +138,22 @@ void insereArtigos(){
 
 
 
-// varGlobais
+
+
 void atualizarVarGlobais(){
     int artigos_fd = open("artigos.txt",O_RDONLY|O_CREAT|O_CREAT,0666);
+    if(artigos_fd<0){
+        perror("Erro na abertura do ficheiro ARTIGOS");
+    }
     int strings_fd = open("strings.txt",O_RDONLY|O_CREAT|O_CREAT,0666);
+    if(strings_fd<0){
+        perror("Erro na abertura do ficheiro STRINGS");
+    }
     int vendas_fd = open("vendas.txt",O_RDONLY|O_CREAT|O_CREAT,0666);
+    if(vendas_fd<0){
+        perror("Erro na abertura do ficheiro VENDAS");
+    }
+
     char buf[1024];
 
     while(readln(artigos_fd,buf,strlen(buf))>0){
@@ -169,7 +177,6 @@ void atualizarVarGlobais(){
 }
 
 
-// "xxxxxx xxxxxx xxxxxx\n" 21
 off_t avancar_offset_artigos(int linha, int fd){
     int TAM_LINHA=21;
     off_t r;
@@ -179,7 +186,7 @@ off_t avancar_offset_artigos(int linha, int fd){
     return r;
 }
 
-// "xxxxxx\n" 7
+
 off_t avancar_offset_stock(int linha, int fd){
     int TAM_LINHA=7;
     off_t r;
@@ -190,7 +197,6 @@ off_t avancar_offset_stock(int linha, int fd){
 }
 
 
-//80
 off_t avancar_offset_strings(int linha, int fd){
     int TAM_LINHA=80;
     off_t r;
@@ -200,14 +206,13 @@ off_t avancar_offset_strings(int linha, int fd){
     return r;
 }
 
-// buscar o nome do artigo ao ficheiro strings
+
 char* nomeArtigo(int idArtigo){
-    off_t r;
     char* nome;
     char buf[90];
     int strings_fd = open("strings.txt",O_RDONLY); 
     
-    r = avancar_offset_strings(idArtigo,strings_fd);
+    avancar_offset_strings(idArtigo,strings_fd);
     readln(strings_fd,buf,strlen(buf));
     close(strings_fd);
 
@@ -220,11 +225,11 @@ char* NumToString (int i){
      long long n=i;
      char str[10];
      int count=0;
-     while(n != 0)
-    {
+     while(n != 0){
         n = n/10;
         ++count;
     }
+
     int NumZeros= 6-count;
     if(NumZeros==0){
          sprintf(str,"%d",i); 

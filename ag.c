@@ -11,16 +11,8 @@
 #include <time.h>
 #include "estruturas.c"
 
-/**
-O agregador é um programa que recebe, pelo stdin, um conjunto de entradas do ficheiro VENDAS com a 
-finalidade de agregar e enviar o resultado para o stdout. Ora, este conjunto de entradas do ficheiro 
-de VENDAS é um subconjunto do ficheiro completo, isto é, é um intervalo de registos do ficheiro VENDAS.
-Assim, uma vez que o enunciado indica que o agregador recebe essas entradas, este não deve sequer ter
-qualquer conhecimento sobre o ficheiro nem sobre a última agregação, devendo atribuir esta responsabilidade
-ao programa que o vai invocar.
-*/
 
-void puta(int fd){
+void initagAuxiliar(int fd){
     int i;
     char string[15];
     for (i = 1; i < idAtualArtigos; i++)
@@ -42,9 +34,13 @@ void ag(){
     int cod;
     int l;
     int agAuxiliar = open("agAuxiliar.txt",O_CREAT | O_RDWR | O_TRUNC,0666);
-    puta(agAuxiliar);  
+    if(agAuxiliar<0){
+      perror("Erro na abertura do ficheiro agAuxiliar");
+    }
+    
+    initagAuxiliar(agAuxiliar);  
     char* timeS = strdup(timestamp());
-	int ag = open(timeS,O_CREAT | O_RDWR,0666);
+  	int ag = open(timeS,O_CREAT | O_RDWR,0666);
 
     char *myfifo3 = "server_to_ag_fifo";
     server_to_ag_fifo = open(myfifo3, O_RDONLY);
