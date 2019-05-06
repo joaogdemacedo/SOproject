@@ -1,6 +1,5 @@
 #include "estruturas.c"
 
-
 void cv(){
    char buf[1024];
    int tLidoT,tLidoP;
