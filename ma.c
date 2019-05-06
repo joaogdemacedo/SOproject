@@ -83,12 +83,12 @@ void ma(){
          }
 
         if (*strings[0] == 'a'){
-            //printf("TT1\n");        
+            printf("TT1\n");        
             int filho;
             filho = fork();
             
             if(filho==0){ 
-                //printf("TT2\n"); 
+                printf("TT2\n");
                 char *myfifo4 = "ma_to_server_fifo";
                 int ma_to_server_fifo = open(myfifo4,O_WRONLY);  
                 write(ma_to_server_fifo,"a\0",1);

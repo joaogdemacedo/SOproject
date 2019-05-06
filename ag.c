@@ -64,7 +64,7 @@ void ag(){
           l = atoi(linha);
         
           if(l==0){
-             // printf("TT9\n");
+             // printf);("TT9\n");
               memset(&linha[0], 0, sizeof(linha));
               lseek(agAuxiliar,14*(cod-1)+7,SEEK_SET);
               write(agAuxiliar,NumToString(linhaAtual),6);

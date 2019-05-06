@@ -46,12 +46,11 @@ void cv(){
        memset(&buf[0], 0, sizeof(buf));
     }  
   }
-    
 }
 
 
 int main(int argc, char * argv[]){
     cv();
-
+  
     return 1;
 }

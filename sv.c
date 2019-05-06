@@ -63,7 +63,7 @@ void sv()
         int tL;
         char total[10];
         char buffer[1024];
-
+        
         if ((tL = readln(ultimaLinha, buffer, sizeof(buffer))) == 0)
         {
             linhaVendas = 1;
@@ -76,11 +76,12 @@ void sv()
             memset(&buffer[0], 0, sizeof(buffer));
             //  printf("TT4\n");
         }
-       
+        
         int ma_to_server_fifo = open(myfifo4, O_RDONLY);
-
+        while(1){
         while ((tL = read(ma_to_server_fifo, buffer, sizeof(buffer))) > 0)
-        {
+        {   
+            
             int server_to_ag_fifo = open(myfifo3, O_WRONLY);
             lseek(vendas_fd, 21 * (linhaVendas - 1), SEEK_SET);
             //   printf("TT4.1\n");
@@ -106,8 +107,11 @@ void sv()
             close(ultimaLinha);
             memset(&total[0], 0, sizeof(total));
         }
+        }
+        close(ma_to_server_fifo);
+        _exit(-1);
     }
-
+    else{
     client_to_server = open(myfifo, O_RDONLY);
     server_to_client = open(myfifo2, O_WRONLY);
 
@@ -239,6 +243,7 @@ void sv()
             codValido = 1;
             memset(&buf[0], 0, sizeof(buf));
         }
+    }
     }
 }
 
