@@ -13,5 +13,8 @@ ag: ag.c
 clean: 
 	rm ma sv cv
 
+clean22: 
+	rm ultimaLinha.txt agAuxiliar.txt
+
 cleanall:
 	rm strings.txt artigos.txt

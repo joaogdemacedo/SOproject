@@ -99,6 +99,14 @@ void ag(){
           }
         memset(&buf[0], 0, sizeof(buf)); 
    }
+   char bufff[21];
+    lseek(ag,0,SEEK_SET);
+    while((tEntrada= readln(ag,bufff,strlen(bufff)))>0){
+         write(1,"Agregação final:\n",strlen("Agregação final:\n"));
+         write(1,bufff,strlen(bufff));
+         write(1,"\n",1);
+         memset(&bufff[0], 0, sizeof(bufff)); 
+    } 
 
    printf("Agregação terminada\n");
    close(agAuxiliar);
