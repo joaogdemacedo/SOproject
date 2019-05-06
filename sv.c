@@ -258,12 +258,25 @@ void handler(int i)
     }
 }
 
+void handler2(int i){
+    if(i==SIGTERM){
+        write(1,"\nServidor desconectado!\n",strlen("\nServidor desconectado!\n"));
+        close(client_to_server);
+        close(server_to_client);
+        unlink("client_to_server_fifo");
+        unlink("server_to_client_fifo");
+        kill(getpid(),SIGKILL);
+    }
+}
 
 int main(int argc, char *argv[])
 {
     if (signal(SIGINT, handler) == SIG_ERR)
     {
         perror("SIGINT failed");
+    }
+    if(signal(SIGTERM,handler2)==SIG_ERR){
+        perror("SIGTERM failed");
     }
     //addInfo();
     atualizarVarGlobais();
