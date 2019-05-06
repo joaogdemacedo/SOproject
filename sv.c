@@ -35,10 +35,8 @@ void sv()
 
     bastardo = fork();
     if(bastardo == 0){
-        //printf("TT2\n");
+       // printf("TT2\n");
 
-        int ma_to_server_fifo = open(myfifo4,O_RDONLY);
-        int server_to_ag_fifo  = open(myfifo3,O_WRONLY);
         int linhaVendas=0;
         int tL;
         char total[10];
@@ -48,20 +46,21 @@ void sv()
         if((tL = readln(ultimaLinha, buffer, sizeof(buffer))) == 0){
              linhaVendas = 1;
              memset(&buffer[0], 0, sizeof(buffer));
-             //printf("TT3\n");
+            // printf("TT3\n");
         }else { 
             linhaVendas = atoi(buffer);          
             memset(&buffer[0], 0, sizeof(buffer)); 
-            //printf("TT4\n");
+          //  printf("TT4\n");
         }
-
+        int ma_to_server_fifo = open(myfifo4,O_RDONLY);
         
         while((tL = read(ma_to_server_fifo, buffer, sizeof(buffer))) > 0){
+            int server_to_ag_fifo  = open(myfifo3,O_WRONLY);
             lseek(vendas_fd,21*(linhaVendas-1),SEEK_SET);
-            //printf("TT4.1\n");
+         //   printf("TT4.1\n");
             
             while((tL = readln(vendas_fd, buffer, sizeof(buffer))) > 0){
-               // printf("TT5\n");
+             //   printf("TT5\n");
                 int m = fork();
                  if(m==0){
                    write(server_to_ag_fifo,buffer,tL);
@@ -71,6 +70,7 @@ void sv()
                  memset(&buffer[0], 0, sizeof(buffer)); 
                  linhaVendas++;
         }
+        close(server_to_ag_fifo);
 
             sprintf(total,"%d\n",linhaVendas);
             lseek(ultimaLinha,0,SEEK_SET);
@@ -169,7 +169,7 @@ void sv()
                         memset(&buffilho[0], 0, sizeof(buffilho));
 
                         lseek(vendas_fd, 0, SEEK_END);
-                        sprintf(str, "%d %d %d\n", codigo, abs(quant), (abs(quant) * preco));
+                        sprintf(str, "%s %s %s\n", NumToString(codigo), NumToString(abs(quant)), NumToString((abs(quant) * preco)));
                         write(vendas_fd, str, strlen(str));
 
                         sprintf(str, "Stock atual: %d\n", stock_novo);
@@ -226,6 +226,8 @@ void handler(int i){
         close(server_to_client);
         unlink("client_to_server_fifo");
         unlink("server_to_client_fifo");
+        unlink("ma_to_server_fifo");
+        unlink("server_to_ag_fifo");
 
         kill(getpid(),SIGKILL);
     }
@@ -237,8 +239,7 @@ int main(int argc, char *argv[])
         perror("SIGINT failed");
         
     }
-
-    addInfo();
+    //addInfo();
     atualizarVarGlobais();
     //insereArtigos();
     sv();

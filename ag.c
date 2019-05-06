@@ -32,7 +32,7 @@ void puta(int fd){
 }
 
 void ag(){
-    //printf("TT6\n");
+   // printf("TT6\n");
     int tEntrada;
     char buf[1024];
     char linha[7];
@@ -49,15 +49,17 @@ void ag(){
     char *myfifo3 = "server_to_ag_fifo";
     server_to_ag_fifo = open(myfifo3, O_RDONLY);
     dup2(server_to_ag_fifo,0);
-    //printf("TT7\n");
+   // printf("TT7\n");
+   
 
 
     // entrada = codigo quantidade montante
+    printf("A agregar ...\n");
     while((tEntrada = read(0,buf,sizeof(buf)))>0){
-       // printf("%s\n",buf);
-          strings = malloc(sizeof(char *) * 2);
+      //  printf("%s\n",buf);
+          strings = malloc(sizeof(char *) * 3);
           strings = splitString(buf);
-     //     printf("TT8\n");
+        //  printf("TT8\n");
           
           cod=atoi(strings[0]);
           lseek(agAuxiliar,14*(cod-1)+7,SEEK_SET);
@@ -66,7 +68,7 @@ void ag(){
           l = atoi(linha);
         
           if(l==0){
-            //  printf("TT9\n");
+             // printf("TT9\n");
               memset(&linha[0], 0, sizeof(linha));
               lseek(agAuxiliar,14*(cod-1)+7,SEEK_SET);
               write(agAuxiliar,NumToString(linhaAtual),6);
@@ -78,7 +80,7 @@ void ag(){
               write(ag,buf,strlen(buf));
               memset(&buf[0], 0, sizeof(buf));  
           } else {
-            //  printf("TT10\n");
+              //printf("TT10\n");
               memset(&buf[0], 0, sizeof(buf)); 
               lseek(ag,21 * (l-1)+7,SEEK_SET);
               memset(&linha[0], 0, sizeof(linha));
@@ -102,6 +104,7 @@ void ag(){
         memset(&buf[0], 0, sizeof(buf)); 
    }
 
+   printf("Agregação terminada\n");
    close(agAuxiliar);
    close(server_to_ag_fifo);
    close(ag);
@@ -110,6 +113,12 @@ void ag(){
 
 int main(int argc, char *argv[])
 {
+   int i;
    atualizarVarGlobais();
+  // if((i=fork())==0){
    ag();
+    //  _exit(1);
+  // }
+  // wait(NULL);   
+  // kill(getpid(),SIGKILL);
 }
