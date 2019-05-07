@@ -125,6 +125,7 @@ void sv()
             strings = malloc(sizeof(char *) * 2);
             strings = splitString(buf);
 
+            
             for (nCmds = 0; strings[nCmds] != NULL; nCmds++)
             {
             };
@@ -242,6 +243,10 @@ void sv()
             }
             codValido = 1;
             memset(&buf[0], 0, sizeof(buf));
+            for(int v=0;v<2;v++){
+                free(*(strings+v));
+            }
+            free(strings);
         }
     }
     }
@@ -270,6 +275,8 @@ void handler2(int i){
         close(server_to_client);
         unlink("client_to_server_fifo");
         unlink("server_to_client_fifo");
+        unlink("ma_to_server_fifo");
+        unlink("server_to_ag_fifo");
         kill(getpid(),SIGKILL);
     }
 }

@@ -24,6 +24,7 @@ void ma(){
         perror("Erro na abertura do ficheiro STOCKS");
     }
 
+
     while((totalL=readln(0,buf,strlen(buf))>0)){
          strings = malloc(sizeof(char *)*totalL);
          strings = splitString(buf);

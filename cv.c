@@ -15,6 +15,7 @@ void cv(){
   fd_set set;
   struct timeval timeout;
 
+  // int tt = open("scriptCV.txt",O_RDONLY);
 
    while((tLidoT = readln(0,buf,sizeof(buf)))>0){
      // ((char*)buf)[strlen(buf)-1]='\0';

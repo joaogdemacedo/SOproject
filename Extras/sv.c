@@ -336,6 +336,11 @@ void sv()
                 }
                 codValido = 1;
                 memset(&buf[0], 0, sizeof(buf));
+                for(int v=0;v<2;v++){
+                    free(*(strings+v));
+                }
+                free(strings);
+                
             }
         }
     }
