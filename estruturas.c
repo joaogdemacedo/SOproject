@@ -250,7 +250,12 @@ char* NumToString (int i){
     if(NumZeros==5){
         sprintf(str,"00000%d",i);
     }
+    if(NumZeros==6){
+        sprintf(str,"00000%d",i);
+    }
+
     char*r=strdup(str);
+    memset(&str[0], 0, sizeof(str));
     return r;
 }
 

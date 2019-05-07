@@ -35,6 +35,7 @@ void ma(){
              newstr = malloc(strlen(strings[1]) + 2);
              strcpy(newstr, strings[1]);
              strcat(newstr, "\n");
+             free(newstr);
              
             
              write(strings_fd,newstr,strlen(newstr));     
@@ -47,6 +48,7 @@ void ma(){
              printf("ID do artigo: %d\n",idAtualArtigos);
              idAtualArtigos++;
              idAtualStrings++;
+             memset(&stringNum[0], 0, sizeof(stringNum));
          }
 
          if(*strings[0]=='n'){   
