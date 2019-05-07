@@ -99,7 +99,11 @@ void ag(char *nomePipe,int n){
               write(ag,buf,13);
               memset(&buf[0], 0, sizeof(buf)); 
           }
-        memset(&buf[0], 0, sizeof(buf)); 
+        memset(&buf[0], 0, sizeof(buf));
+        for(int v=0;v<3;v++){
+                free(*(strings+v));
+            }
+        free(strings); 
    }
   /* char bufff[21];
     lseek(ag,0,SEEK_SET);

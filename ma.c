@@ -26,7 +26,7 @@ void ma(){
 
 
     while((totalL=readln(0,buf,strlen(buf))>0)){
-         strings = malloc(sizeof(char *)*totalL);
+         strings = malloc(sizeof(char *)*3);
          strings = splitString(buf);
         
          
@@ -104,6 +104,10 @@ void ma(){
          }  
 
         memset(&buf[0], 0, sizeof(buf));
+        for(int v=0;v<3;v++){
+                free(*(strings+v));
+            }
+        free(strings); 
     }
     
     close(artigos_fd);
