@@ -5,7 +5,7 @@ int server_to_client = -1;
 
 void sv()
 {
-    int p, r, q, status;
+    int p, status;
     int codigo, nCmds, quant;
     int totalLido, codValido = 1;
     char **strings;
@@ -25,16 +25,16 @@ void sv()
     }
 
     char *myfifo = "client_to_server_fifo";
-    char *myfifo2 = "server_to_client_fifo";
+   // char *myfifo2 = "server_to_client_fifo";
     char *myfifo3 = "server_to_ag_fifo";
     char *myfifo4 = "ma_to_server_fifo";
 
     if(mkfifo(myfifo, 0666)<0){
         perror("Erro na criação do pipe com nome client_to_server_fifo");
     }
-    if(mkfifo(myfifo2, 0666)<0){
+   /* if(mkfifo(myfifo2, 0666)<0){
         perror("Erro na criação do pipe com nome server_to_client_fifo");
-    }
+    } */
     if(mkfifo(myfifo3, 0666)<0){
         perror("Erro na criação do pipe com nome server_to_ag_fifo");
     } 
@@ -112,17 +112,20 @@ void sv()
         _exit(-1);
     }
     else{
+    
     client_to_server = open(myfifo, O_RDONLY);
-    server_to_client = open(myfifo2, O_WRONLY);
+    //server_to_client = open(myfifo2, O_WRONLY);
+
 
     while (1)
     {
+
         while ((totalLido = read(client_to_server, buf, sizeof(buf))) > 0)
         {
             // buf[totalLido] = '\0';
             printf("Mensagem recebida do cliente: %s\n", buf);
 
-            strings = malloc(sizeof(char *) * 2);
+            strings = malloc(sizeof(char *) * 3);
             strings = splitString(buf);
 
             
@@ -135,7 +138,14 @@ void sv()
             {
                 if ((p = fork()) == 0)
                 {
+                    if(nCmds==2) {
+                        server_to_client = open(strings[1], O_WRONLY);
+                        } 
+                    else{
+                        server_to_client = open(strings[2], O_WRONLY);
+                    }
                     write(server_to_client, "Esse artigo não se encontra registado\n", strlen("Esse artigo não se encontra registado\n"));
+                    close(server_to_client);
                     _exit(1);
                 }
                 else
@@ -145,8 +155,9 @@ void sv()
                 }
             }
 
-            if (nCmds == 1 && codValido == 1)
+            if (nCmds == 2 && codValido == 1)
             {
+                
                 if ((p = fork()) == 0)
                 {
                     char buffilho[6];
@@ -161,7 +172,9 @@ void sv()
                     memset(&buffilho[0], 0, sizeof(buffilho));
 
                     sprintf(str, "Em stock: %d Preco: %d\n", stock, preco);
+                    server_to_client = open(strings[1], O_WRONLY);
                     write(server_to_client, str, strlen(str));
+                    close(server_to_client);
                     _exit(1);
                 }
                 else
@@ -170,7 +183,7 @@ void sv()
                 }
             }
 
-            if (nCmds == 2 && codValido == 1)
+            if (nCmds == 3 && codValido == 1)
             {
                 quant = atoi(strings[1]);
                 if (quant < 0)
@@ -178,6 +191,7 @@ void sv()
                     //efetuar venda
                     if ((p = fork()) == 0)
                     {
+                        
                         char buffilho[6];
                         avancar_offset_stock(codigo, stocks_fd);
                         read(stocks_fd, buffilho, 6);
@@ -186,7 +200,9 @@ void sv()
 
                         if (stock_novo < 0)
                         {
+                            server_to_client = open(strings[2], O_WRONLY);
                             write(server_to_client, "Quantidade indisponivel.\n", strlen("Quantidade indisponivel.\n"));
+                            close(server_to_client);
                             _exit(-1);
                         }
 
@@ -205,7 +221,9 @@ void sv()
                         write(vendas_fd, str, strlen(str));
 
                         sprintf(str, "Stock atual: %d\n", stock_novo);
+                        server_to_client = open(strings[2], O_WRONLY);
                         write(server_to_client, str, strlen(str));
+                        close(server_to_client);
 
                         idAtualVendas++;
 
@@ -221,6 +239,7 @@ void sv()
                     //entrada em stock
                     if ((p = fork()) == 0)
                     {
+                        
                         char buffilho[6];
                         avancar_offset_stock(codigo, stocks_fd);
                         read(stocks_fd, buffilho, 6);
@@ -228,7 +247,9 @@ void sv()
                         int stock_novo = stock_antigo + quant;
 
                         sprintf(str, "Stock atual: %d\n", stock_novo);
+                        server_to_client = open(strings[2], O_WRONLY);
                         write(server_to_client, str, strlen(str));
+                        close(server_to_client);
 
                         avancar_offset_stock(codigo, stocks_fd);
                         write(stocks_fd, NumToString(stock_novo), 6);
@@ -243,7 +264,7 @@ void sv()
             }
             codValido = 1;
             memset(&buf[0], 0, sizeof(buf));
-            for(int v=0;v<2;v++){
+            for(int v=0;v<3;v++){
                 free(*(strings+v));
             }
             free(strings);
@@ -260,7 +281,7 @@ void handler(int i)
         close(client_to_server);
         close(server_to_client);
         unlink("client_to_server_fifo");
-        unlink("server_to_client_fifo");
+       // unlink("server_to_client_fifo");
         unlink("ma_to_server_fifo");
         unlink("server_to_ag_fifo");
 
@@ -274,7 +295,7 @@ void handler2(int i){
         close(client_to_server);
         close(server_to_client);
         unlink("client_to_server_fifo");
-        unlink("server_to_client_fifo");
+     //   unlink("server_to_client_fifo");
         unlink("ma_to_server_fifo");
         unlink("server_to_ag_fifo");
         kill(getpid(),SIGKILL);

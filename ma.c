@@ -24,8 +24,9 @@ void ma(){
         perror("Erro na abertura do ficheiro STOCKS");
     }
 
+    int p = open("scriptMA.txt",O_RDONLY);
 
-    while((totalL=readln(0,buf,strlen(buf))>0)){
+    while((totalL=readln(p,buf,strlen(buf))>0)){
          strings = malloc(sizeof(char *)*3);
          strings = splitString(buf);
         
@@ -36,12 +37,12 @@ void ma(){
              newstr = malloc(strlen(strings[1]) + 2);
              strcpy(newstr, strings[1]);
              strcat(newstr, "\n");
-             free(newstr);
+            
              
             
              write(strings_fd,newstr,strlen(newstr));     
              sprintf(stringNum,"%s %s %s\n",NumToString(idAtualArtigos),NumToString(idAtualStrings),NumToString(atoi(strings[2]))); 
-             write(stocks_fd,"000000\n",7);
+             write(stocks_fd,"001000\n",7);
 
              lseek(artigos_fd,0,SEEK_END);
              write(artigos_fd,stringNum,strlen(stringNum));
@@ -49,6 +50,7 @@ void ma(){
              printf("ID do artigo: %d\n",idAtualArtigos);
              idAtualArtigos++;
              idAtualStrings++;
+             free(newstr);
              memset(&stringNum[0], 0, sizeof(stringNum));
          }
 
@@ -66,6 +68,7 @@ void ma(){
                 lseek(artigos_fd,7,SEEK_CUR);
                 write(artigos_fd,NumToString(idAtualStrings),6);
                 idAtualStrings++;
+                free(newstr);
 
              }else{
                 printf("Esse artigo não se encontra registado\n");
@@ -98,8 +101,7 @@ void ma(){
                 close(ma_to_server_fifo);
                 execlp("./ag","./ag",NULL,NULL);
             } else {
-               wait(NULL);
-              
+               wait(NULL);   
            }
          }  
 

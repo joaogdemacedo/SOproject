@@ -10,7 +10,6 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include <time.h>
-#include <ctype.h>
 #include "estruturas.h"
 
 int idAtualArtigos=1;
@@ -138,19 +137,16 @@ void insereArtigos(){
 }
 
 
-
-
-
 void atualizarVarGlobais(){
-    int artigos_fd = open("artigos.txt",O_RDONLY|O_CREAT|O_CREAT,0666);
+    int artigos_fd = open("artigos.txt",O_RDONLY|O_CREAT,0666);
     if(artigos_fd<0){
         perror("Erro na abertura do ficheiro ARTIGOS");
     }
-    int strings_fd = open("strings.txt",O_RDONLY|O_CREAT|O_CREAT,0666);
+    int strings_fd = open("strings.txt",O_RDONLY|O_CREAT,0666);
     if(strings_fd<0){
         perror("Erro na abertura do ficheiro STRINGS");
     }
-    int vendas_fd = open("vendas.txt",O_RDONLY|O_CREAT|O_CREAT,0666);
+    int vendas_fd = open("vendas.txt",O_RDONLY|O_CREAT,0666);
     if(vendas_fd<0){
         perror("Erro na abertura do ficheiro VENDAS");
     }
