@@ -18,26 +18,27 @@ void cv(){
     }
    //char *myfifo2 = "server_to_client_fifo";
 
-   int rv;
+  // int rv;
   
-   fd_set set;
-   struct timeval timeout;
+  // fd_set set;
+  // struct timeval timeout;
 
-   int tt1 = open("scriptCV_1.txt",O_RDONLY);
+  // int tt1 = open("scriptCV.txt",O_RDONLY);
 
-   while((tLidoT = readln(tt1,buf,sizeof(buf)))>0){
+   while((tLidoT = readln(0,buf,sizeof(buf)))>0){
      // ((char*)buf)[strlen(buf)-1]='\0';
 
       client_to_server = open(myfifo, O_WRONLY);
      
    //   FD_ZERO(&set); /* clear the set */
    //   FD_SET(server_to_client, &set);
-      sprintf(msg,"%s %s",buf,nomeP);
+      sprintf(msg,"%s %s\n",buf,nomeP);
       write(client_to_server,msg,strlen(msg));
       close(client_to_server);
      
 
       memset(&buf[0], 0, sizeof(buf));
+      memset(&msg[0], 0, sizeof(msg));
       
   //    timeout.tv_sec = 0;
 

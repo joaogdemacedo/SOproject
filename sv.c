@@ -52,6 +52,7 @@ void sv()
         perror("Erro na abertura do ficheiro ultimalinha");
     }
 
+
     int bastardo;
 
     bastardo = fork();
@@ -78,35 +79,46 @@ void sv()
         }
         
         int ma_to_server_fifo = open(myfifo4, O_RDONLY);
-        while(1){
-        while ((tL = read(ma_to_server_fifo, buffer, sizeof(buffer))) > 0)
-        {   
-            
-            int server_to_ag_fifo = open(myfifo3, O_WRONLY);
-            lseek(vendas_fd, 21 * (linhaVendas - 1), SEEK_SET);
-            //   printf("TT4.1\n");
-
-            while ((tL = readln(vendas_fd, buffer, sizeof(buffer))) > 0)
+        while (1)
+        {
+            while ((tL = readln(ma_to_server_fifo, buffer, sizeof(buffer))) > 0)
             {
-                //   printf("TT5\n");
-                int m = fork();
-                if (m == 0)
-                {
-                    write(server_to_ag_fifo, buffer, tL);
-                    _exit(1);
-                }
-                wait(NULL);
-                memset(&buffer[0], 0, sizeof(buffer));
-                linhaVendas++;
-            }
-            close(server_to_ag_fifo);
+                        printf("TT5\n");
+                        printf("%s",buffer);
+                        printf("TT6\n");
+                        lseek(vendas_fd, 21 * (linhaVendas - 1), SEEK_SET);
+                        printf("TT7\n");
+                        int server_to_ag_fifo = open(myfifo3, O_WRONLY);
+                        printf("TT4.1\n");
+                        char* newstr;
 
-            sprintf(total, "%d\n", linhaVendas);
-            lseek(ultimaLinha, 0, SEEK_SET);
-            write(ultimaLinha, total, strlen(total));
-            close(ultimaLinha);
-            memset(&total[0], 0, sizeof(total));
-        }
+                        while ((tL = readln(vendas_fd, buffer, sizeof(buffer))) > 0)
+                        {
+                           // printf("TT5\n");
+                            newstr = malloc(strlen(buffer) + 2);
+                            strcpy(newstr, buffer);
+                            strcat(newstr, "\n");
+                           
+                            int m = fork();
+                            if (m == 0)
+                            {
+                                printf("Entrou\n");
+                                write(server_to_ag_fifo, newstr, strlen(newstr));
+                                _exit(1);
+                            }
+                            wait(NULL);
+                            memset(&buffer[0], 0, sizeof(buffer));
+                            linhaVendas++;
+                            free(newstr);                            
+                        }
+                        close(server_to_ag_fifo);
+                        sprintf(total, "%s\n", NumToString(linhaVendas));
+                        lseek(ultimaLinha, 0, SEEK_SET);
+                        write(ultimaLinha, total,7);
+                        close(ultimaLinha);
+                        memset(&total[0], 0, sizeof(total));
+                 
+            }
         }
         close(ma_to_server_fifo);
         _exit(-1);
@@ -120,7 +132,7 @@ void sv()
     while (1)
     {
 
-        while ((totalLido = read(client_to_server, buf, sizeof(buf))) > 0)
+        while ((totalLido = readln(client_to_server, buf, sizeof(buf))) > 0)
         {
             // buf[totalLido] = '\0';
             printf("Mensagem recebida do cliente: %s\n", buf);
@@ -161,16 +173,20 @@ void sv()
                 if ((p = fork()) == 0)
                 {
                     char buffilho[6];
+                    int preco;
                     avancar_offset_stock(codigo, stocks_fd);
                     read(stocks_fd, buffilho, 6);
                     int stock = atoi(buffilho);
                     memset(&buffilho[0], 0, sizeof(buffilho));
+
+                    
                     avancar_offset_artigos(codigo, artigos_fd);
                     lseek(artigos_fd, 14, SEEK_CUR);
                     read(artigos_fd, buffilho, 6);
-                    int preco = atoi(buffilho);
+                    preco = atoi(buffilho);
                     memset(&buffilho[0], 0, sizeof(buffilho));
-
+                    
+                    
                     sprintf(str, "Em stock: %d Preco: %d\n", stock, preco);
                     server_to_client = open(strings[1], O_WRONLY);
                     write(server_to_client, str, strlen(str));
@@ -195,6 +211,7 @@ void sv()
                         char buffilho[6];
                         avancar_offset_stock(codigo, stocks_fd);
                         read(stocks_fd, buffilho, 6);
+                        int preco;
                         int stock_antigo = atoi(buffilho);
                         int stock_novo = stock_antigo + quant;
 
@@ -209,12 +226,13 @@ void sv()
                         avancar_offset_stock(codigo, stocks_fd);
                         write(stocks_fd, NumToString(stock_novo), 6);
                         memset(&buffilho[0], 0, sizeof(buffilho));
-
+                        
                         avancar_offset_artigos(codigo, artigos_fd);
                         lseek(artigos_fd, 14, SEEK_CUR);
                         read(artigos_fd, buffilho, 6);
-                        int preco = atoi(buffilho);
+                        preco = atoi(buffilho);
                         memset(&buffilho[0], 0, sizeof(buffilho));
+                        
 
                         lseek(vendas_fd, 0, SEEK_END);
                         sprintf(str, "%s %s %s\n", NumToString(codigo), NumToString(abs(quant)), NumToString((abs(quant) * preco)));
@@ -247,13 +265,15 @@ void sv()
                         int stock_novo = stock_antigo + quant;
 
                         sprintf(str, "Stock atual: %d\n", stock_novo);
-                        server_to_client = open(strings[2], O_WRONLY);
-                        write(server_to_client, str, strlen(str));
-                        close(server_to_client);
 
                         avancar_offset_stock(codigo, stocks_fd);
                         write(stocks_fd, NumToString(stock_novo), 6);
                         memset(&buffilho[0], 0, sizeof(buffilho));
+
+                        server_to_client = open(strings[2], O_WRONLY);
+                        write(server_to_client, str, strlen(str));
+                        close(server_to_client);
+
                         _exit(3);
                     }
                     else
@@ -281,10 +301,9 @@ void handler(int i)
         close(client_to_server);
         close(server_to_client);
         unlink("client_to_server_fifo");
-       // unlink("server_to_client_fifo");
+        //unlink("server_to_client_fifo");
         unlink("ma_to_server_fifo");
         unlink("server_to_ag_fifo");
-
         kill(getpid(), SIGKILL);
     }
 }
@@ -295,7 +314,7 @@ void handler2(int i){
         close(client_to_server);
         close(server_to_client);
         unlink("client_to_server_fifo");
-     //   unlink("server_to_client_fifo");
+        //unlink("server_to_client_fifo");
         unlink("ma_to_server_fifo");
         unlink("server_to_ag_fifo");
         kill(getpid(),SIGKILL);
@@ -311,8 +330,6 @@ int main(int argc, char *argv[])
     if(signal(SIGTERM,handler2)==SIG_ERR){
         perror("SIGTERM failed");
     }
-    //addInfo();
     atualizarVarGlobais();
-    //insereArtigos();
     sv();
 }
