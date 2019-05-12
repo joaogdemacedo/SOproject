@@ -24,7 +24,8 @@ void ma(){
         perror("Erro na abertura do ficheiro STOCKS");
     }
 
-    //int p = open("scriptMA.txt",O_RDONLY);
+    
+   // int testarScript = open("scriptMA.txt",O_RDONLY);
 
     while((totalL=readln(0,buf,strlen(buf))>0)){
          strings = malloc(sizeof(char *)*3);
@@ -89,18 +90,14 @@ void ma(){
              } 
          }
 
-         if (*strings[0] == 'a'){
-            printf("TT1\n");        
+         if (*strings[0] == 'a'){       
             int filho;
             filho = fork();
             
             if(filho==0){ 
-                printf("TT2\n");
                 char *myfifo4 = "ma_to_server_fifo";
                 int ma_to_server_fifo = open(myfifo4,O_WRONLY);  
-                printf("TT3\n");
                 write(ma_to_server_fifo,"a\n",2);
-                printf("TT4\n");
                 close(ma_to_server_fifo);
                 execlp("./ag","./ag",NULL,NULL);
             } else {
@@ -122,9 +119,8 @@ void ma(){
 
 
 int main(int argc,  char * argv[]){
+      printf("A atualizar variáveis globais...\n");
       atualizarVarGlobais();
-      printf("Artigos: %d\n", idAtualArtigos);
-      printf("Strings: %d\n", idAtualStrings);
-      printf("Vendas: %d\n", idAtualVendas);
+      printf("MA pronto a usar\n");
       ma();
 }

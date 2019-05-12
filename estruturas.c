@@ -16,13 +16,6 @@ int idAtualArtigos=1;
 int idAtualStrings=1; 
 int idAtualVendas=1;
 
-struct Artigos{
-    int nVendas;
-    int codigoArtigo;
-    int preco;
-};
-artigos colecaoArtigos[15];
-
 
 
 char* timestamp(){
@@ -134,20 +127,6 @@ off_t avancar_offset_strings(int linha, int fd){
 
     r = lseek(fd,offset,SEEK_SET);
     return r;
-}
-
-
-char* nomeArtigo(int idArtigo){
-    char* nome;
-    char buf[90];
-    int strings_fd = open("strings.txt",O_RDONLY); 
-    
-    avancar_offset_strings(idArtigo,strings_fd);
-    readln(strings_fd,buf,strlen(buf));
-    close(strings_fd);
-
-    nome=strdup(buf);
-    return nome;
 }
 
 

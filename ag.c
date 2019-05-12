@@ -24,7 +24,6 @@ void initagAuxiliar(int fd){
 }
 
 void ag(){
-   // printf("TT6\n");
     int tEntrada;
     char buf[1024];
     char linha[7];
@@ -45,26 +44,23 @@ void ag(){
     char *myfifo3 = "server_to_ag_fifo";
     server_to_ag_fifo = open(myfifo3, O_RDONLY);
     dup2(server_to_ag_fifo,0);
-   // printf("TT7\n");
    
 
 
-    // entrada = codigo quantidade montante
     printf("A agregar ...\n");
     while((tEntrada = readln(0,buf,sizeof(buf)))>0){
-      //  printf("%s\n",buf);
+  
           strings = malloc(sizeof(char *) * 3);
           strings = splitString(buf);
-        //  printf("TT8\n");
+       
           
           cod=atoi(strings[0]);
           lseek(agAuxiliar,14*(cod-1)+7,SEEK_SET);
           readln(agAuxiliar,linha,6);
-      //    printf("%s\n",linha);
+     
           l = atoi(linha);
         
           if(l==0){
-             // printf);("TT9\n");
 
               memset(&linha[0], 0, sizeof(linha));
               lseek(agAuxiliar,14*(cod-1)+7,SEEK_SET);
@@ -73,15 +69,12 @@ void ag(){
 
               
               lseek(ag,0,SEEK_END);
-              /*memset(&buf[0], 0, sizeof(buf));
-              sprintf(buf,"%s %s %s\n",NumToString(cod),NumToString(atoi(strings[1])),NumToString(atoi(strings[2])));
-              if(cod==180323){printf("%s",buf);sleep(15);}*/
 
               write(ag,buf,strlen(buf));
               write(ag,"\n",1);
               memset(&buf[0], 0, sizeof(buf));  
           } else {
-              //printf("TT10\n");
+             
               memset(&buf[0], 0, sizeof(buf)); 
               lseek(ag,21 * (l-1)+7,SEEK_SET);
               memset(&linha[0], 0, sizeof(linha));
@@ -127,6 +120,7 @@ void ag(){
 
 int main(int argc, char *argv[])
 {
+   printf("A atualizar variáveis globais...\n");
    atualizarVarGlobais();
    ag();
 
