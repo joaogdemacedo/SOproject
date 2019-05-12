@@ -72,15 +72,11 @@ void atualizarVarGlobais(){
     }
 
     char buf[1024];
-    char** part=malloc(sizeof(char*)*3);
-
-    lseek(artigos_fd,-21,SEEK_END);
-    readln(artigos_fd,buf,strlen(buf));
-    part = splitString(buf);
-
-    idAtualArtigos=atoi(part[0]);
-    idAtualArtigos++;
-    memset(&buf[0], 0, sizeof(buf));
+    
+    while(readln(artigos_fd,buf,strlen(buf))>0){      
+        idAtualArtigos++;
+        memset(&buf[0], 0, sizeof(buf)); 
+    }
     close(artigos_fd);
 
         

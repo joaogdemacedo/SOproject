@@ -16,7 +16,7 @@ void sv()
     if(vendas_fd<0){
         perror("Erro na abertura do ficheiro VENDAS");
     }
-    int stocks_fd = open("stocks.txt", O_RDWR);
+    int stocks_fd = open("stocks.txt", O_RDWR|O_CREAT,0666);
     if(stocks_fd<0){
         perror("Erro na abertura do ficheiro STOCKS");
     }
