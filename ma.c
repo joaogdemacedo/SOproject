@@ -41,7 +41,7 @@ void ma(){
                          
              write(strings_fd,newstr,strlen(newstr));     
              sprintf(stringNum,"%s %s %s\n",NumToString(idAtualArtigos),NumToString(idAtualStrings),NumToString(atoi(strings[2]))); 
-             write(stocks_fd,"001000\n",7);
+             write(stocks_fd,"000000\n",7);
 
              lseek(artigos_fd,0,SEEK_END);
              write(artigos_fd,stringNum,strlen(stringNum));
