@@ -25,34 +25,34 @@ void ma(){
     }
 
     
-   // int testarScript = open("scriptMA.txt",O_RDONLY);
+  //  int testarScript = open("scriptMA.txt",O_RDONLY);
 
     while((totalL=readln(0,buf,strlen(buf))>0)){
          strings = malloc(sizeof(char *)*3);
          strings = splitString(buf);
-        
+              
          
          if(*strings[0]=='i'){
-            char stringNum[totalL];
-
+             char stringNum[totalL];
              newstr = malloc(strlen(strings[1]) + 2);
              strcpy(newstr, strings[1]);
              strcat(newstr, "\n");
             
-             
-            
+                         
              write(strings_fd,newstr,strlen(newstr));     
              sprintf(stringNum,"%s %s %s\n",NumToString(idAtualArtigos),NumToString(idAtualStrings),NumToString(atoi(strings[2]))); 
              write(stocks_fd,"001000\n",7);
 
              lseek(artigos_fd,0,SEEK_END);
              write(artigos_fd,stringNum,strlen(stringNum));
+            
 
              printf("ID do artigo: %d\n",idAtualArtigos);
              idAtualArtigos++;
              idAtualStrings++;
              free(newstr);
              memset(&stringNum[0], 0, sizeof(stringNum));
+            
          }
 
          if(*strings[0]=='n'){   

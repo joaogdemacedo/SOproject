@@ -32,7 +32,7 @@ int main(int argc, char const *argv[])
 	int i;
 	char cmd[4] = {'i','n','p','\0'};
 
-	for (i = 0; i < 500000; i++)
+	for (i = 0; i < 300000; i++)
 	{
 		int tamnome = rand() % 80;
 		if (tamnome<3){tamnome+=4;}
@@ -48,7 +48,7 @@ int main(int argc, char const *argv[])
 	for (i = 0; i < 10000; i++)
 	{
 		int opcao = rand() % 2;
-		int codigo = rand() % 500000;
+		int codigo = rand() % 300000;
 		char linha[100];
 		char string[20];
 

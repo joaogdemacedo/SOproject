@@ -92,6 +92,7 @@ void atualizarVarGlobais(){
         memset(&buf[0], 0, sizeof(buf)); 
     }
     close(vendas_fd); 
+     printf("%d\n",idAtualArtigos);
 
 }
 
